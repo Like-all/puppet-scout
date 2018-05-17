@@ -1,6 +1,6 @@
 # == Class: scoutd
 #
-# Installs and configures the scoutapp.com monitoring agent.
+# Installs and configures the server.pingdom.com monitoring agent.
 #
 # === Example
 #
@@ -11,11 +11,11 @@
 #
 # === Authors
 #
-# Scout <support@scoutapp.com> (Derek Haynes)
+# Scout <support@server.pingdom.com> (Andre Lewis)
 #
 # === Copyright
 #
-# Copyright 2013 Derek Haynes
+# Copyright 2013 Andre Lewis
 #
 class scoutd(
   $account_key,
@@ -30,14 +30,15 @@ class scoutd(
   $statsd_enabled = false,
   $statsd_address = false,
   $gems           = false,
-  $ensure         = present,
+  $gems_ensure    = latest,
+  $ensure         = latest,
   $plugin_pubkey  = ''
 ) {
   case $::operatingsystem {
       'Ubuntu': {
         apt::key { 'scout':
           key        => '705372CB1DF3976C44B7B8A6BBE475EBA38683E4',
-          key_source => 'https://archive.scoutapp.com/scout-archive.key',
+          key_source => 'https://archive.server.pingdom.com/scout-archive.key',
         }
 
         case $::operatingsystemmajrelease {
@@ -58,7 +59,7 @@ class scoutd(
           }
         }
         apt::source { 'scout':
-          location    => 'https://archive.scoutapp.com',
+          location    => 'https://archive.server.pingdom.com',
           include_src => false,
           release     => $release,
           repos       => 'main',
@@ -69,7 +70,7 @@ class scoutd(
       'Debian': {
         apt::key { 'scout':
           key        => '705372CB1DF3976C44B7B8A6BBE475EBA38683E4',
-          key_source => 'https://archive.scoutapp.com/scout-archive.key',
+          key_source => 'https://archive.server.pingdom.com/scout-archive.key',
         }
 
         case $::operatingsystemmajrelease {
@@ -84,7 +85,7 @@ class scoutd(
           }
         }
         apt::source { 'scout':
-          location    => 'https://archive.scoutapp.com',
+          location    => 'https://archive.server.pingdom.com',
           include_src => false,
           release     => $release,
           repos       => 'main',
@@ -95,14 +96,14 @@ class scoutd(
       }
       'RedHat', 'CentOS': {
         yumrepo { 'scout':
-          baseurl => 'http://archive.scoutapp.com/rhel/$releasever/main/$basearch/',
-          gpgkey  => 'https://archive.scoutapp.com/RPM-GPG-KEY-scout'
+          baseurl => 'http://archive.server.pingdom.com/rhel/$releasever/main/$basearch/',
+          gpgkey  => 'https://archive.server.pingdom.com/RPM-GPG-KEY-scout'
         }
       }
       'Fedora': {
         yumrepo { 'scout':
-          baseurl => 'http://archive.scoutapp.com/fedora/$releasever/main/$basearch/',
-          gpgkey  => 'https://archive.scoutapp.com/RPM-GPG-KEY-scout'
+          baseurl => 'http://archive.server.pingdom.com/fedora/$releasever/main/$basearch/',
+          gpgkey  => 'https://archive.server.pingdom.com/RPM-GPG-KEY-scout'
         }
       }
       default: {
@@ -110,7 +111,7 @@ class scoutd(
       }
     }
 
-    package { 'scoutd': ensure => latest }
+    package { 'scoutd': ensure => $ensure }
 
     service { 'scout':
       ensure  => running,
@@ -150,7 +151,7 @@ class scoutd(
     # install any plugin gem dependencies
     if $gems {
       package { $gems:
-        ensure   => latest,
+        ensure   => $gems_ensure,
         provider => gem,
       }
     }
